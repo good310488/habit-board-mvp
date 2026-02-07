@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Habit Board MVP</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="top">
+        <div>
+          <p class="eyebrow">Habit Board</p>
+          <h1>みんなで続ける習慣ボード</h1>
+          <p id="boardStatus" class="subtle">未接続</p>
+        </div>
+        <div class="top-actions">
+          <button id="syncBtn" class="ghost">Sync</button>
+          <button id="logoutBtn" class="ghost">ボード切替</button>
+          <button id="signOutBtn" class="ghost">ログアウト</button>
+        </div>
+      </header>
+
+      <section id="configNotice" class="notice hidden"></section>
+
+      <section id="login" class="card">
+        <div class="section-title">
+          <h2>ログイン</h2>
+          <p class="subtle">メールとパスワードでサインイン / 新規登録</p>
+        </div>
+        <div class="auth-grid">
+          <div class="panel">
+            <label>
+              メールアドレス
+              <input id="emailInput" type="email" placeholder="you@example.com" />
+            </label>
+            <label>
+              パスワード
+              <input id="passwordInput" type="password" placeholder="8文字以上" />
+            </label>
+            <div class="row">
+              <button id="signInBtn">サインイン</button>
+              <button id="signUpBtn" class="ghost">新規登録</button>
+            </div>
+            <p id="authStatus" class="subtle">未ログイン</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="auth" class="card">
+        <div class="section-title">
+          <h2>ボードに参加</h2>
+          <p class="subtle">ログイン後にボードを作成・参加できます。</p>
+        </div>
+        <div class="auth-grid">
+          <div class="panel">
+            <h3>既存ボードに参加</h3>
+            <label>
+              ボードID
+              <input id="joinBoardId" placeholder="例: 3f5c..." />
+            </label>
+            <label>
+              あなたの名前
+              <input id="joinDisplayName" placeholder="例: とし" />
+            </label>
+            <button id="joinBtn">参加する</button>
+          </div>
+          <div class="panel">
+            <h3>新しく作成</h3>
+            <label>
+              ボード名
+              <input id="createBoardName" placeholder="例: みんなの習慣" />
+            </label>
+            <label>
+              あなたの名前
+              <input id="createDisplayName" placeholder="例: とし" />
+            </label>
+            <button id="createBtn">作成する</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="board" class="hidden">
+        <div class="card board-meta">
+          <div>
+            <button id="boardName" class="board-title" title="クリックで編集">Board</button>
+            <p class="subtle">
+              ボードID: <span id="boardId"></span>
+              <button id="copyBoardId" class="link">コピー</button>
+            </p>
+          </div>
+          <div>
+            <p class="subtle">参加メンバー</p>
+            <div class="member-select" id="memberSelect"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="row">
+            <input id="habitInput" placeholder="例: 朝のストレッチ" />
+            <button id="addHabitBtn">習慣を追加</button>
+          </div>
+          <div class="row row-slim">
+            <div class="range-controls">
+              <button id="prevRange" class="ghost">前の週</button>
+              <button id="todayRange" class="ghost">今日</button>
+              <button id="nextRange" class="ghost">次の週</button>
+            </div>
+            <label class="toggle">
+              <input id="showArchived" type="checkbox" />
+              アーカイブを表示
+            </label>
+          </div>
+          <div id="grid"></div>
+        </div>
+
+        <div class="card">
+          <div class="section-title">
+            <h3>メンバー設定</h3>
+            <p class="subtle">自分の名前と色を変更できます。</p>
+          </div>
+          <div id="memberSettings" class="member-settings"></div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <p class="subtle">MVP版: リロードで反映 / リアルタイムは未対応</p>
+      </footer>
+    </div>
+
+    <script src="./config.js"></script>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

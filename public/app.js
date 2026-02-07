@@ -2,6 +2,7 @@ import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js
 
 const config = window.__APP_CONFIG__ || {};
 const configNotice = document.getElementById("configNotice");
+const inviteNotice = document.getElementById("inviteNotice");
 const loginSection = document.getElementById("login");
 const authSection = document.getElementById("auth");
 const boardSection = document.getElementById("board");
@@ -20,7 +21,8 @@ const state = {
   dates: [],
   showArchived: false,
   rangeStart: null,
-  rangeDays: 7
+  rangeDays: 7,
+  inviteBoardId: null
 };
 
 const supabaseUrl = config.supabaseUrl;
@@ -60,6 +62,7 @@ const logoutBtn = document.getElementById("logoutBtn");
 const boardName = document.getElementById("boardName");
 const boardId = document.getElementById("boardId");
 const copyBoardId = document.getElementById("copyBoardId");
+const copyInviteLink = document.getElementById("copyInviteLink");
 
 const memberSelect = document.getElementById("memberSelect");
 const memberSettings = document.getElementById("memberSettings");
@@ -102,11 +105,18 @@ if (signOutBtn) {
   });
 }
 
+const savedDisplayName = localStorage.getItem("habitBoardDisplayName");
+if (savedDisplayName) {
+  if (joinDisplayName) joinDisplayName.value = savedDisplayName;
+  if (createDisplayName) createDisplayName.value = savedDisplayName;
+}
+
 joinBtn.addEventListener("click", () => {
   if (!hasConfig) return;
   const id = joinBoardId.value.trim();
   const displayName = joinDisplayName.value.trim();
   if (!id || !displayName) return alert("ボードIDと名前を入力してください");
+  localStorage.setItem("habitBoardDisplayName", displayName);
   joinBoard(id, displayName);
 });
 
@@ -115,6 +125,7 @@ createBtn.addEventListener("click", () => {
   const name = createBoardName.value.trim() || "みんなの習慣";
   const displayName = createDisplayName.value.trim();
   if (!displayName) return alert("名前を入力してください");
+  localStorage.setItem("habitBoardDisplayName", displayName);
   createBoard(name, displayName);
 });
 
@@ -134,6 +145,15 @@ copyBoardId.addEventListener("click", async () => {
   await navigator.clipboard.writeText(state.board.id);
   alert("ボードIDをコピーしました");
 });
+
+if (copyInviteLink) {
+  copyInviteLink.addEventListener("click", async () => {
+    if (!state.board) return;
+    const inviteUrl = `${window.location.origin}${window.location.pathname}?board=${state.board.id}`;
+    await navigator.clipboard.writeText(inviteUrl);
+    alert("招待リンクをコピーしました");
+  });
+}
 
 boardName.addEventListener("click", () => {
   if (!state.board) return;
@@ -258,6 +278,16 @@ function init() {
   if (showArchivedToggle) {
     showArchivedToggle.checked = state.showArchived;
   }
+  const inviteBoardId = new URLSearchParams(window.location.search).get(
+    "board"
+  );
+  if (inviteBoardId) {
+    state.inviteBoardId = inviteBoardId.trim();
+    if (joinBoardId) {
+      joinBoardId.value = state.inviteBoardId;
+    }
+  }
+  updateInviteNotice();
   if (!hasConfig || !supabase) {
     render();
     return;
@@ -717,7 +747,21 @@ function resetDateRange() {
   }
 }
 
+function updateInviteNotice() {
+  if (!inviteNotice) return;
+  if (!state.inviteBoardId || state.board) {
+    inviteNotice.classList.add("hidden");
+    return;
+  }
+  const message = state.user
+    ? "招待リンクを読み込みました。名前を入力して「参加する」を押してください。"
+    : "招待リンクを読み込みました。ログイン後に名前を入力して「参加する」を押してください。";
+  inviteNotice.textContent = message;
+  inviteNotice.classList.remove("hidden");
+}
+
 function render() {
+  updateInviteNotice();
   if (!state.user) {
     boardStatus.textContent = "未ログイン";
     authStatus.textContent = "未ログイン";

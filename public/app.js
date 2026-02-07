@@ -637,7 +637,8 @@ async function moveHabit(habitId, direction) {
     return;
   }
   const sameGroup = state.habits.filter(
-    (item) => item.archived === habit.archived
+    (item) =>
+      item.archived === habit.archived && item.member_id === habit.member_id
   );
   const index = sameGroup.findIndex((item) => item.id === habitId);
   const target = sameGroup[index + direction];
@@ -850,8 +851,15 @@ function renderGrid() {
   const activeHabits = state.habits.filter((habit) => !habit.archived);
   const archivedHabits = state.habits.filter((habit) => habit.archived);
 
-  const buildRows = (habits) =>
-    habits
+  const buildRows = (habits) => {
+    const groupOrder = new Map();
+    habits.forEach((habit) => {
+      const list = groupOrder.get(habit.member_id) ?? [];
+      list.push(habit.id);
+      groupOrder.set(habit.member_id, list);
+    });
+
+    return habits
       .map((habit, index) => {
         const owner = memberMap.get(habit.member_id);
         const ownerColor = owner ? owner.color : "#d9d3cc";
@@ -860,8 +868,10 @@ function renderGrid() {
         const canEdit = state.member && habit.member_id === state.member.id;
         const archiveAction = isArchived ? "unarchive" : "archive";
         const archiveLabel = isArchived ? "復元" : "アーカイブ";
-        const isFirst = index === 0;
-        const isLast = index === habits.length - 1;
+        const groupIds = groupOrder.get(habit.member_id) ?? [];
+        const groupIndex = groupIds.indexOf(habit.id);
+        const isFirst = groupIndex <= 0;
+        const isLast = groupIndex === groupIds.length - 1;
         const cells = state.dates
           .map((date) => renderCell(habit.id, date, ownerColor, isArchived))
           .join("");
@@ -885,6 +895,7 @@ function renderGrid() {
         `;
       })
       .join("");
+  };
 
   const buildSection = (habits, title) => {
     if (!habits.length) return "";
